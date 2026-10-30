@@ -1,0 +1,13 @@
+name: sonic-two-switches
+
+topology:
+  kinds:
+    sonic-vs:
+      image: docker-sonic-vs:latest
+  nodes:
+    sw1:
+      kind: sonic-vs
+    sw2:
+      kind: sonic-vs
+  links:
+    - endpoints: ["sw1:eth1", "sw2:eth1"]

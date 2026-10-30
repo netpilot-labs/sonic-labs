@@ -1,0 +1,44 @@
+name: sonic-bgp
+
+topology:
+  kinds:
+    sonic-vs:
+      image: docker-sonic-vs:latest
+      binds:
+        - configs:/configs:ro
+  nodes:
+    spine1:
+      kind: sonic-vs
+      exec:
+        - bash /configs/spine1.sh
+    spine2:
+      kind: sonic-vs
+      exec:
+        - bash /configs/spine2.sh
+    leaf1:
+      kind: sonic-vs
+      exec:
+        - bash /configs/leaf1.sh
+    leaf2:
+      kind: sonic-vs
+      exec:
+        - bash /configs/leaf2.sh
+    host1:
+      kind: linux
+      image: alpine:3.20
+      exec:
+        - ip addr add 192.168.1.10/24 dev eth1
+        - ip route replace default via 192.168.1.1 dev eth1
+    host2:
+      kind: linux
+      image: alpine:3.20
+      exec:
+        - ip addr add 192.168.2.10/24 dev eth1
+        - ip route replace default via 192.168.2.1 dev eth1
+  links:
+    - endpoints: ["spine1:eth1", "leaf1:eth1"]
+    - endpoints: ["spine1:eth2", "leaf2:eth1"]
+    - endpoints: ["spine2:eth1", "leaf1:eth2"]
+    - endpoints: ["spine2:eth2", "leaf2:eth2"]
+    - endpoints: ["leaf1:eth3", "host1:eth1"]
+    - endpoints: ["leaf2:eth3", "host2:eth1"]

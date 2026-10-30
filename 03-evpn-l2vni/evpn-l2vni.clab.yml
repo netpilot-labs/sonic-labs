@@ -1,0 +1,38 @@
+name: sonic-evpn
+
+topology:
+  kinds:
+    sonic-vs:
+      image: docker-sonic-vs:latest
+      binds:
+        - configs:/configs:ro
+  nodes:
+    spine:
+      kind: sonic-vs
+      exec:
+        - bash /configs/spine.sh
+    leaf1:
+      kind: sonic-vs
+      exec:
+        - bash /configs/leaf1.sh
+    leaf2:
+      kind: sonic-vs
+      exec:
+        - bash /configs/leaf2.sh
+    host1:
+      kind: linux
+      image: alpine:3.20
+      exec:
+        - ip link set dev eth1 mtu 1500
+        - ip addr add 192.168.100.11/24 dev eth1
+    host2:
+      kind: linux
+      image: alpine:3.20
+      exec:
+        - ip link set dev eth1 mtu 1500
+        - ip addr add 192.168.100.12/24 dev eth1
+  links:
+    - endpoints: ["spine:eth1", "leaf1:eth1"]
+    - endpoints: ["spine:eth2", "leaf2:eth1"]
+    - endpoints: ["leaf1:eth2", "host1:eth1"]
+    - endpoints: ["leaf2:eth2", "host2:eth1"]
